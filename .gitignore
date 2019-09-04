@@ -118,3 +118,4 @@ experiments/batch_hard/events.out.tfevents.1563259638.xjl-PC
 experiments/batch_hard/graph.pbtxt
 experiments/batch_hard/model.ckpt-0.data-00000-of-00001
 experiments/batch_hard/model.ckpt-18750.data-00000-of-00001
+experiments/batch_hard/events*
