@@ -5,6 +5,8 @@ import tensorflow as tf
 
 def _pairwise_distances(embeddings, squared=False):
     """Compute the 2D matrix of distances between all the embeddings.
+    (computer the distances between the first example and the others,
+    then the second, and so on... forming a matrix, diagonal always 0)
 
     Args:
         embeddings: tensor of shape (batch_size, embed_dim)
@@ -69,7 +71,7 @@ def _get_anchor_positive_triplet_mask(labels):
 
 
 def _get_anchor_negative_triplet_mask(labels):
-    """Return a 2D mask where mask[a, n] is True iff a and n have distinct labels.
+    """Return a 2D mask where mask[a, n] is True if a and n have distinct labels.
 
     Args:
         labels: tf.int32 `Tensor` with shape [batch_size]
@@ -198,7 +200,8 @@ def batch_hard_triplet_loss(labels, embeddings, margin, squared=False):
     anchor_positive_dist = tf.multiply(mask_anchor_positive, pairwise_dist)
 
     # shape (batch_size, 1)
-    hardest_positive_dist = tf.reduce_max(anchor_positive_dist, axis=1, keepdims=True)
+    #hardest_positive_dist = tf.reduce_max(anchor_positive_dist, axis=1, keepdims=True)
+    hardest_positive_dist = tf.reduce_min(anchor_positive_dist, axis=1, keepdims=True)
     tf.summary.scalar("hardest_positive_dist", tf.reduce_mean(hardest_positive_dist))
 
     # For each anchor, get the hardest negative
