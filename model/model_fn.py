@@ -4,6 +4,7 @@ import tensorflow as tf
 
 from model.triplet_loss import batch_all_triplet_loss
 from model.triplet_loss import batch_hard_triplet_loss
+from model.triplet_loss import batch_test_triplet_loss
 
 
 def build_model(is_training, images, params):
@@ -81,7 +82,8 @@ def model_fn(features, labels, mode, params):
         loss = batch_hard_triplet_loss(labels, embeddings, margin=params.margin,
                                        squared=params.squared)
     elif params.triplet_strategy == "batch_test":
-        loss = batch_hard_triplet_loss()
+        loss = batch_test_triplet_loss(labels, embeddings, margin=params.margin,
+                                       squared=params.squared)
     else:
         raise ValueError("Triplet strategy not recognized: {}".format(params.triplet_strategy))
 
