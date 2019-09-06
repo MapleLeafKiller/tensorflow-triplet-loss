@@ -25,10 +25,8 @@ parser.add_argument('--sprite_filename', default='experiments/mnist_10k_sprite.p
 
 
 if __name__ == '__main__':
-    #tf.reset_default_graph()
-    tf.compat.v1.reset_default_graph()
-    #tf.logging.set_verbosity(tf.logging.INFO)
-    tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
+    tf.reset_default_graph()
+    tf.logging.set_verbosity(tf.logging.INFO)
 
     # Load the parameters from json file
     args = parser.parse_args()
@@ -37,7 +35,7 @@ if __name__ == '__main__':
     params = Params(json_path)
 
     # Define the model
-    tf.compat.v1.logging.INFO("Creating the model...")
+    tf.logging.info("Creating the model...")
     config = tf.estimator.RunConfig(tf_random_seed=230,
                                     model_dir=args.model_dir,
                                     save_summary_steps=params.save_summary_steps)
