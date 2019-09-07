@@ -3,6 +3,7 @@
 import tensorflow as tf
 
 import model.mnist_dataset as mnist_dataset
+import model.cifar10_input as cifar10_dataset
 
 
 def train_input_fn(data_dir, params):
@@ -30,4 +31,25 @@ def test_input_fn(data_dir, params):
     dataset = mnist_dataset.test(data_dir)
     dataset = dataset.batch(params.batch_size)
     dataset = dataset.prefetch(1)  # make sure you always have one batch ready to serve
+    return dataset
+
+def train_input_fn_cifar10(data_dir, params):
+    """Train input function for the MNIST dataset.
+
+    Args:
+        data_dir: (string) path to the data directory
+        params: (Params) contains hyperparameters of the model (ex: `params.num_epochs`)
+    """
+    dataset = cifar10_dataset.distorted_inputs("train", params.batch_size, data_dir)
+    return dataset
+
+
+def test_input_fn_cifar10(data_dir, params):
+    """Test input function for the MNIST dataset.
+
+    Args:
+        data_dir: (string) path to the data directory
+        params: (Params) contains hyperparameters of the model (ex: `params.num_epochs`)
+    """
+    dataset = cifar10_dataset.distorted_inputs("test", params.batch_size, data_dir)
     return dataset

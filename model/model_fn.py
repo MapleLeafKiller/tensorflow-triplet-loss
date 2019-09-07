@@ -33,9 +33,9 @@ def build_model(is_training, images, params):
             out = tf.nn.relu(out)
             out = tf.layers.max_pooling2d(out, 2, 2)
 
-    assert out.shape[1:] == [7, 7, num_channels * 2]
+    # assert out.shape[1:] == [7, 7, num_channels * 2]  # mnist
+    # out = tf.reshape(out, [-1, 7 * 7 * num_channels * 2])  # mnist
 
-    out = tf.reshape(out, [-1, 7 * 7 * num_channels * 2])
     with tf.variable_scope('fc_1'):
         out = tf.layers.dense(out, params.embedding_size)
 

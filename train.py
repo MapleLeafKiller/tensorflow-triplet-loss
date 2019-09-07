@@ -7,14 +7,16 @@ import tensorflow as tf
 
 from model.input_fn import train_input_fn
 from model.input_fn import test_input_fn
+from model.input_fn import train_input_fn_cifar10
+from model.input_fn import test_input_fn_cifar10
 from model.model_fn import model_fn
 from model.utils import Params
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--model_dir', default='experiments/batch_hard',
+parser.add_argument('--model_dir', default='experiments/batch_hard_cifar10',
                     help="Experiment directory containing params.json")
-parser.add_argument('--data_dir', default='data/mnist',
+parser.add_argument('--data_dir', default='data/mnist', # cifar10
                     help="Directory containing the dataset")
 
 
@@ -37,10 +39,16 @@ if __name__ == '__main__':
 
     # Train the model
     tf.logging.info("--------Starting training for {} epoch(s).".format(params.num_epochs))
-    estimator.train(lambda: train_input_fn(args.data_dir, params))
+    if args.data_dir == 'data/cifar10':
+        estimator.train(lambda: train_input_fn_cifar10(args.data_dir, params))
+    else:
+        estimator.train(lambda: train_input_fn(args.data_dir, params))
 
     # Evaluate the model on the test set
     tf.logging.info("--------Evaluation on test set.")
-    res = estimator.evaluate(lambda: test_input_fn(args.data_dir, params))
+    if args.data_dir == 'data/cifar10':
+        res = estimator.evaluate(lambda: test_input_fn_cifar10(args.data_dir, params))
+    else:
+        res = estimator.evaluate(lambda: test_input_fn(args.data_dir, params))
     for key in res:
         print("--------{}: {}".format(key, res[key]))

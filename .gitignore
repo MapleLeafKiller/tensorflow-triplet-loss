@@ -108,6 +108,7 @@ venv.bak/
 
 # dataset
 data/mnist/
+data/cifar10/
 
 # checkpoints
 *.index
@@ -119,3 +120,5 @@ experiments/**/checkpoint*
 experiments/**/eval/
 experiments/**/graph*
 experiments/**/model*
+
+
