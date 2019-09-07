@@ -188,6 +188,8 @@ def batch_hard_triplet_loss(labels, embeddings, margin, squared=False):
     Returns:
         triplet_loss: scalar tensor containing the triplet loss
     """
+
+
     # Get the pairwise distance matrix
     pairwise_dist = _pairwise_distances(embeddings, squared=squared)
 
@@ -195,6 +197,11 @@ def batch_hard_triplet_loss(labels, embeddings, margin, squared=False):
     # First, we need to get a mask for every valid positive (they should have same label)
     mask_anchor_positive = _get_anchor_positive_triplet_mask(labels)
     mask_anchor_positive = tf.to_float(mask_anchor_positive)
+
+    # print("mask_anchor_positive=", mask_anchor_positive)
+    # with tf.Session() as sess:
+    #     mask_tf_val = sess.run(mask_anchor_positive)
+    # print("mask_tf_val=", mask_tf_val.shape)
 
     # We put to 0 any element where (a, p) is not valid (valid if a != p and label(a) == label(p))
     anchor_positive_dist = tf.multiply(mask_anchor_positive, pairwise_dist)

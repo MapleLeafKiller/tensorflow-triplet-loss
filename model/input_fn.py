@@ -52,4 +52,8 @@ def test_input_fn_cifar10(data_dir, params):
         params: (Params) contains hyperparameters of the model (ex: `params.num_epochs`)
     """
     dataset = cifar10_dataset.distorted_inputs("test", params.batch_size, data_dir)
+    print("----dataset:", dataset)
+    print("----dataset.shape:", dataset.shape)
+
+
     return dataset

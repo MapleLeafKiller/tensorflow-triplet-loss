@@ -36,6 +36,9 @@ def build_model(is_training, images, params):
     # assert out.shape[1:] == [7, 7, num_channels * 2]  # mnist
     # out = tf.reshape(out, [-1, 7 * 7 * num_channels * 2])  # mnist
 
+    assert out.shape[1:] == [6, 6, num_channels * 2]  # cifar10
+    out = tf.reshape(out, [-1, 6 * 6 * num_channels * 2])  # cifar10
+
     with tf.variable_scope('fc_1'):
         out = tf.layers.dense(out, params.embedding_size)
 
@@ -73,6 +76,7 @@ def model_fn(features, labels, mode, params):
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
     labels = tf.cast(labels, tf.int64)
+
 
     # Define triplet loss
     if params.triplet_strategy == "batch_all":

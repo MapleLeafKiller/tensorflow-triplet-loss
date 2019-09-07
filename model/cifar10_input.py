@@ -40,7 +40,7 @@ def _get_images_labels(batch_size, split, data_dir, distords=False):
   with tf.name_scope(scope):
     dataset = dataset.map(DataPreprocessor(distords), num_parallel_calls=10)
   # Dataset is small enough to be fully loaded on memory:
-  dataset = dataset.prefetch(1)
+  dataset = dataset.prefetch(-1)
   dataset = dataset.repeat().batch(batch_size)
   iterator = dataset.make_one_shot_iterator()
   images_labels = iterator.get_next()
