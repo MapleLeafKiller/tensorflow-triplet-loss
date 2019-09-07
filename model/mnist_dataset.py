@@ -94,6 +94,10 @@ def dataset(directory, images_file, labels_file):
     images = tf.data.FixedLengthRecordDataset(images_file, 28 * 28, header_bytes=16)
     images = images.map(decode_image)
     labels = tf.data.FixedLengthRecordDataset(labels_file, 1, header_bytes=8).map(decode_label)
+    # print("images.output_types=", images.output_types)  # float32
+    # print("images.output_shapes=", images.output_shapes)  # (784,)
+    # print("labels.output_types=", labels.output_types)  # int32
+    # print("labels.output_shapes=", labels.output_shapes)  # ()
     return tf.data.Dataset.zip((images, labels))
 
 

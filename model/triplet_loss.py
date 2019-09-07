@@ -203,6 +203,7 @@ def batch_hard_triplet_loss(labels, embeddings, margin, squared=False):
     #     mask_tf_val = sess.run(mask_anchor_positive)
     # print("mask_tf_val=", mask_tf_val.shape)
 
+
     # We put to 0 any element where (a, p) is not valid (valid if a != p and label(a) == label(p))
     anchor_positive_dist = tf.multiply(mask_anchor_positive, pairwise_dist)
 
