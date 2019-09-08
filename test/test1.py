@@ -1,7 +1,5 @@
 # test for learning the detail code
-
-import tensorflow as tf
-
+# import the inspect_checkpoint library
 
 # ------------- triplet-loss.py _pairwise_distances() -------------------
 
