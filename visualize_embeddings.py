@@ -1,4 +1,4 @@
-"""Train the model"""
+"""Create embedding file"""
 
 import argparse
 import os
@@ -49,11 +49,12 @@ if __name__ == '__main__':
     predictions = estimator.predict(lambda: test_input_fn(args.data_dir, params))
 
     # TODO (@omoindrot): remove the hard-coded 10000
-    embeddings = np.zeros((10000, params.embedding_size))
-    for i, p in enumerate(predictions):
+    # embeddings = np.zeros((10000, params.embedding_size))
+    embeddings = np.zeros((params.eval_size, params.embedding_size))
+    for i, p in enumerate(predictions):  # i:enumerate_id, p:{'embeddings':array(64)}
         embeddings[i] = p['embeddings']
 
-    tf.logging.info("Embeddings shape: {}".format(embeddings.shape))
+    tf.logging.info("Embeddings shape: {}".format(embeddings.shape))  # (10000, 64)
 
     # Visualize test embeddings
     embedding_var = tf.Variable(embeddings, name='mnist_embedding')
@@ -69,14 +70,16 @@ if __name__ == '__main__':
     # Copy the embedding sprite image to the eval directory
     shutil.copy2(args.sprite_filename, eval_dir)
     embedding.sprite.image_path = pathlib.Path(args.sprite_filename).name
-    embedding.sprite.single_image_dim.extend([28, 28])
+    embedding.sprite.single_image_dim.extend([params.image_size, params.image_size])
+    # embedding.sprite.single_image_dim.extend([28, 28])
 
     with tf.Session() as sess:
         # TODO (@omoindrot): remove the hard-coded 10000
         # Obtain the test labels
         dataset = mnist_dataset.test(args.data_dir)
         dataset = dataset.map(lambda img, lab: lab)
-        dataset = dataset.batch(10000)
+        # dataset = dataset.batch(10000)
+        dataset = dataset.batch(params.eval_size)
         labels_tensor = dataset.make_one_shot_iterator().get_next()
         labels = sess.run(labels_tensor)
 

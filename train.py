@@ -51,4 +51,9 @@ if __name__ == '__main__':
     else:
         res = estimator.evaluate(lambda: test_input_fn(args.data_dir, params))
     for key in res:
-        print("--------{}: {}".format(key, res[key]))
+        print("--------evaluate:{}: {}".format(key, res[key]))
+
+    # # Test the model
+    # res = estimator.predict(lambda: test_input_fn(args.data_dir, params))
+    # for key in res:
+    #     print("--------predict:{}: {}".format(key, res[key]))

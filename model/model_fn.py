@@ -21,8 +21,8 @@ def build_model(is_training, images, params):
     """
     out = images
     # Define the number of channels of each convolution
-    # For each block, we do: 3x3 conv -> batch norm -> relu -> 2x2 maxpool
-    num_channels = params.num_channels
+    # For each block(total 2 block), we do: 3x3 conv -> batch norm -> relu -> 2x2 maxpool
+    num_channels = params.num_channels  # number of kernels
     bn_momentum = params.bn_momentum
     channels = [num_channels, num_channels * 2]
     for i, c in enumerate(channels):
@@ -45,6 +45,10 @@ def build_model(is_training, images, params):
     return out
 
 
+def __save_embedding__(embeddings,lables):
+    pass
+
+
 def model_fn(features, labels, mode, params):
     """Model function for tf.estimator
 
@@ -64,19 +68,28 @@ def model_fn(features, labels, mode, params):
     assert images.shape[1:] == [params.image_size, params.image_size, 1], "{}".format(images.shape)
 
     # -----------------------------------------------------------
-    # MODEL: define the layers of the model
+    # compute embeddings of the input images
     with tf.variable_scope('model'):
         # Compute the embeddings with the model
         embeddings = build_model(is_training, images, params)
     embedding_mean_norm = tf.reduce_mean(tf.norm(embeddings, axis=1))
     tf.summary.scalar("embedding_mean_norm", embedding_mean_norm)
 
+    # -----------------------------------------------------------
+    # predict
     if mode == tf.estimator.ModeKeys.PREDICT:
+        # calculate the class label of input images
+        # with tf.Session() as sess:
+        #     print("embeddings=", sess.run(embeddings))
+        #     print("embeddings.shape=", sess.run(embeddings.shape))
+        #     # read embedding file of training dataset, perform knn
+        #     for feature in embeddings:
+        #         pass
+
         predictions = {'embeddings': embeddings}
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
     labels = tf.cast(labels, tf.int64)
-
 
     # Define triplet loss
     if params.triplet_strategy == "batch_all":
@@ -92,8 +105,7 @@ def model_fn(features, labels, mode, params):
         raise ValueError("Triplet strategy not recognized: {}".format(params.triplet_strategy))
 
     # -----------------------------------------------------------
-    # METRICS AND SUMMARIES
-    # Metrics for evaluation using tf.metrics (average over whole dataset)
+    # evaluate using tf.metrics (average over whole dataset)
     # TODO: some other metrics like rank-1 accuracy?
     with tf.variable_scope("metrics"):
         eval_metric_ops = {"embedding_mean_norm": tf.metrics.mean(embedding_mean_norm)}
@@ -108,8 +120,8 @@ def model_fn(features, labels, mode, params):
     if mode == tf.estimator.ModeKeys.EVAL:
         return tf.estimator.EstimatorSpec(mode, loss=loss, eval_metric_ops=eval_metric_ops)
 
-
-    # Summaries for training
+    # -----------------------------------------------------------
+    # train
     tf.summary.scalar('loss', loss)
     if params.triplet_strategy == "batch_all":
         tf.summary.scalar('fraction_positive_triplets', fraction)
