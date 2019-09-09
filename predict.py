@@ -61,7 +61,6 @@ def __save_embedding__():
     # run k-means for each class otherwise you can't figure out knn's nearest neighbour's lable
 
     y_pred = KMeans(n_clusters=15, random_state=9).fit_predict(embeddings)
-    # y_pred = KMeans(n_clusters=15, random_state=9).fit(embeddings)
 
     # print("k-means score=", metrics.calinski_harabaz_score(embeddings, y_pred))
 
