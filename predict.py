@@ -50,7 +50,7 @@ def __get_centroids__(args, params):
         images_per_class[labels[i]].append(embeddings[i])
 
     kmeans = []
-    n_clusters = 5
+    n_clusters = 1000
     centroids = np.zeros(shape=[params.num_labels, n_clusters, params.embedding_size], dtype=np.float32)
     scores = 0
     for i in range(len(images_per_class)):
@@ -61,7 +61,7 @@ def __get_centroids__(args, params):
         y_pred = KMeans(n_clusters=n_clusters, random_state=0).fit_predict(images_per_class[i])
         score = metrics.calinski_harabaz_score(images_per_class[i], y_pred)
         scores += score
-    # print("scores=", scores)
+    print("scores=", scores)
 
     # save the centroids as npy file, the label of centroid starts from 0 to num_labels-1, each n_clusters add 1
     path = os.path.join(args.model_dir, "centroids_embeddings.npy")
@@ -164,7 +164,7 @@ if __name__ == '__main__':
 
     # run only once
     # calculate embeddings of training set and perform k-means each class, save centroids' embeddings
-    # __get_centroids__(args, params)
+    __get_centroids__(args, params)
 
     # calculate accuracy
     __predict__(args, params)
