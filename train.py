@@ -39,6 +39,7 @@ if __name__ == '__main__':
 
     # Train the model
     tf.logging.info("--------Starting training for {} epoch(s).".format(params.num_epochs))
+    # lambda: pass the function itself instead of passing the return value of the function
     if args.data_dir == 'data/cifar10':
         estimator.train(lambda: train_input_fn_cifar10(args.data_dir, params))
     else:

@@ -67,6 +67,7 @@ def model_fn(features, labels, mode, params):
     images = tf.reshape(images, [-1, params.image_size, params.image_size, 1])
     assert images.shape[1:] == [params.image_size, params.image_size, 1], "{}".format(images.shape)
 
+
     # -----------------------------------------------------------
     # compute embeddings of the input images
     with tf.variable_scope('model'):
@@ -78,14 +79,6 @@ def model_fn(features, labels, mode, params):
     # -----------------------------------------------------------
     # predict
     if mode == tf.estimator.ModeKeys.PREDICT:
-        # calculate the class label of input images
-        # with tf.Session() as sess:
-        #     print("embeddings=", sess.run(embeddings))
-        #     print("embeddings.shape=", sess.run(embeddings.shape))
-        #     # read embedding file of training dataset, perform knn
-        #     for feature in embeddings:
-        #         pass
-
         predictions = {'embeddings': embeddings}
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
@@ -113,8 +106,7 @@ def model_fn(features, labels, mode, params):
         if params.triplet_strategy == "batch_all":
             eval_metric_ops['fraction_positive_triplets'] = tf.metrics.mean(fraction)
 
-        # calculate accuracy using knn
-
+        #
 
 
     if mode == tf.estimator.ModeKeys.EVAL:

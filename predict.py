@@ -14,7 +14,7 @@ from sklearn import metrics
 
 import model.mnist_dataset as mnist_dataset
 from model.utils import Params
-from model.input_fn import test_input_fn
+from model.input_fn import train_embedding_fn
 from model.input_fn import train_input_fn
 from model.model_fn import model_fn
 
@@ -27,7 +27,9 @@ parser.add_argument('--data_dir', default='data/mnist',
 parser.add_argument('--sprite_filename', default='experiments/mnist_10k_sprite.png',
                     help="Sprite image for the projector")
 
-def __save_embedding__():
+
+def __get_embedding__():
+
     tf.reset_default_graph()
     tf.logging.set_verbosity(tf.logging.INFO)
 
@@ -44,23 +46,52 @@ def __save_embedding__():
                                     save_summary_steps=params.save_summary_steps)
     estimator = tf.estimator.Estimator(model_fn, params=params, config=config)
 
+
     # Compute embeddings on the training set
-    tf.logging.info("-------Compute embeddings on the training set")
-    predictions = estimator.predict(lambda: train_input_fn(args.data_dir, params))
+    tf.logging.info("-------Compute embeddings on the training set,remember:No shuffle!!!")
+    predictions = estimator.predict(lambda: train_embedding_fn(args.data_dir, params))
 
     embeddings = np.zeros((params.train_size, params.embedding_size))
-    print("embeddings.size=", embeddings.shape)
     for i, p in enumerate(predictions):  # i:enumerate_id, p:{'embeddings':array(64)}
-        if i >= params.train_size:  # don't know why i can reach it
+        if i >= params.train_size:  # don't know why it can reach params.train_size
             break
         embeddings[i] = p['embeddings']
 
     tf.logging.info("Embeddings shape: {}".format(embeddings.shape))  # (50000, 64)
 
-    # use k-means to create centroid for knn
-    # run k-means for each class otherwise you can't figure out knn's nearest neighbour's lable
+    return embeddings
 
-    y_pred = KMeans(n_clusters=15, random_state=9).fit_predict(embeddings)
+
+
+
+
+    # predictions = res["predictions"]
+    # labels = res["labels"]
+    #
+    # print("predictions=", predictions, "labels=", labels)
+    # for i, p in enumerate(predictions):
+    #     print("predictions=", p)
+
+    # embeddings = np.zeros((params.train_size, params.embedding_size))
+    # print("embeddings.size=", embeddings.shape)
+    # for i, p in enumerate(predictions):  # i:enumerate_id, p:{'embeddings':array(64)}
+    #     if i >= params.train_size:  # don't know why it can reach params.train_size
+    #         break
+    #     embeddings[i] = p['embeddings']
+    #
+    # tf.logging.info("Embeddings shape: {}".format(embeddings.shape))  # (50000, 64)
+    #
+    # # use k-means to create centroid for knn
+    # # run k-means for each class otherwise you can't figure out knn's nearest neighbour's lable
+    #
+    # kmeans = KMeans(n_clusters=15, random_state=0).fit(embeddings)
+    # print(kmeans.cluster_centers_)
+    # print(kmeans.cluster_centers_.shape)
+
+
+    # cluster_centers = [ [] for _ in range(10) ]
+
+
 
     # print("k-means score=", metrics.calinski_harabaz_score(embeddings, y_pred))
 
@@ -69,76 +100,33 @@ def __save_embedding__():
 
     # save as npy file
 
+def __get_label__():
+
+    tf.reset_default_graph()
+    tf.logging.set_verbosity(tf.logging.INFO)
+
+    # Load the parameters from json file
+    args = parser.parse_args()
+    json_path = os.path.join(args.model_dir, 'params.json')
+    assert os.path.isfile(json_path), "No json configuration file found at {}".format(json_path)
+    params = Params(json_path)
+
+    with tf.Session() as sess:
+        # Obtain the test labels
+        dataset = mnist_dataset.train(args.data_dir)
+        dataset = dataset.map(lambda img, lab: lab)
+        dataset = dataset.batch(params.train_size)
+        labels_tensor = dataset.make_one_shot_iterator().get_next()
+        labels = sess.run(labels_tensor)
+
+    return labels
 
 if __name__ == '__main__':
-    __save_embedding__()
-    # tf.reset_default_graph()
-    # tf.logging.set_verbosity(tf.logging.INFO)
-    #
-    # # Load the parameters from json file
-    # args = parser.parse_args()
-    # json_path = os.path.join(args.model_dir, 'params.json')
-    # assert os.path.isfile(json_path), "No json configuration file found at {}".format(json_path)
-    # params = Params(json_path)
-    #
-    # # Define the model
-    # tf.logging.info("-------Creating the model...")
-    # config = tf.estimator.RunConfig(tf_random_seed=230,
-    #                                 model_dir=args.model_dir,
-    #                                 save_summary_steps=params.save_summary_steps)
-    # estimator = tf.estimator.Estimator(model_fn, params=params, config=config)
-    #
-    # # Compute embeddings on the test set
-    # tf.logging.info("-------Predicting")
-    # predictions = estimator.predict(lambda: test_input_fn(args.data_dir, params))
-    #
-    # # TODO (@omoindrot): remove the hard-coded 10000
-    # embeddings = np.zeros((params.eval_size, params.embedding_size))
-    # for i, p in enumerate(predictions):  # i:enumerate_id, p:{'embeddings':array(64)}
-    #     embeddings[i] = p['embeddings']
-    #
-    # tf.logging.info("Embeddings shape: {}".format(embeddings.shape))  # (10000, 64)
-    #
-    # # Visualize test embeddings
-    # embedding_var = tf.Variable(embeddings, name='mnist_embedding')
-    #
-    # eval_dir = os.path.join(args.model_dir, "eval")
-    # summary_writer = tf.summary.FileWriter(eval_dir)
-    #
-    # config = projector.ProjectorConfig()
-    # embedding = config.embeddings.add()
-    # embedding.tensor_name = embedding_var.name
-    #
-    # # Specify where you find the sprite (we will create this later)
-    # # Copy the embedding sprite image to the eval directory
-    # shutil.copy2(args.sprite_filename, eval_dir)
-    # embedding.sprite.image_path = pathlib.Path(args.sprite_filename).name
-    # embedding.sprite.single_image_dim.extend([params.image_size, params.image_size])
-    # # embedding.sprite.single_image_dim.extend([28, 28])
-    #
-    # with tf.Session() as sess:
-    #     # TODO (@omoindrot): remove the hard-coded 10000
-    #     # Obtain the test labels
-    #     dataset = mnist_dataset.test(args.data_dir)
-    #     dataset = dataset.map(lambda img, lab: lab)
-    #     # dataset = dataset.batch(10000)
-    #     dataset = dataset.batch(params.eval_size)
-    #     labels_tensor = dataset.make_one_shot_iterator().get_next()
-    #     labels = sess.run(labels_tensor)
-    #
-    # # Specify where you find the metadata
-    # # Save the metadata file needed for Tensorboard projector
-    # metadata_filename = "mnist_metadata.tsv"
-    # with open(os.path.join(eval_dir, metadata_filename), 'w') as f:
-    #     for i in range(params.eval_size):
-    #         c = labels[i]
-    #         f.write('{}\n'.format(c))
-    # embedding.metadata_path = metadata_filename
-    #
-    # # Say that you want to visualise the embeddings
-    # projector.visualize_embeddings(summary_writer, config)
-    #
-    # saver = tf.train.Saver()
-    # with tf.Session() as sess:
-    #     sess.run(embedding_var.initializer)
-    #     saver.save(sess, os.path.join(eval_dir, "embeddings.ckpt"))
+
+    embeddings = __get_embedding__()
+    labels = __get_label__()
+    # print("embeddings.shape=", embeddings.shape)
+    # print("labels.shape=", labels.shape)
+
+    # now we have embeddings and labels of training set in the same order
+    
