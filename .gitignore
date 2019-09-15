@@ -120,5 +120,5 @@ experiments/**/checkpoint*
 experiments/**/eval/
 experiments/**/graph*
 experiments/**/model*
-
+experiments/**/*.npy
 
