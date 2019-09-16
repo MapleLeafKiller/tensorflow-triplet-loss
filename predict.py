@@ -50,7 +50,7 @@ def __get_centroids__(args, params):
         images_per_class[labels[i]].append(embeddings[i])
 
     kmeans = []
-    n_clusters = 1000
+    n_clusters = 100
     centroids = np.zeros(shape=[params.num_labels, n_clusters, params.embedding_size], dtype=np.float32)
     scores = 0
     for i in range(len(images_per_class)):

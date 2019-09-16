@@ -2,7 +2,9 @@ margin=1 n_cluster=20 n_neighbors=3 85%
 margin=1 n_cluster=50 n_neighbors=3 89%
 margin=1 n_cluster=100 n_neighbors=3 90.95%
 margin=1 n_cluster=200 n_neighbors=3 92%
-margin=1 n_cluster=1000 n_neighbors=3 92%
+margin=1 n_cluster=1000 n_neighbors=3 93.7%
 
-margin=1 n_cluster=50 n_neighbors=10 88%
+margin=5 n_cluster=100 n_neighbors=3 88%
+
+margin=0.5 n_cluster=100 n_neighbors=3 92.55%
 
